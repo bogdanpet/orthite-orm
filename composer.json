@@ -1,0 +1,21 @@
+{
+    "name": "bogdanpet/orthite-orm",
+    "description": "Simple ORM for PHP",
+    "type": "package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bogdan Petkovic",
+            "email": "bgdnptkvc@gmail.com"
+        }
+    ],
+    "require": {
+        "bogdanpet/orthite-db": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Orthite\\ORM\\": "src/",
+            "Models\\": "models/"
+        }
+    }
+}
