@@ -2,3 +2,4 @@
 vendor/
 Models/
 index.php
+migrate.php

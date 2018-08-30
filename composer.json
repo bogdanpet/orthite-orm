@@ -16,6 +16,9 @@
         "psr-4": {
             "Orthite\\ORM\\": "src/",
             "Models\\": "models/"
-        }
+        },
+        "files": [
+            "functions/helpers.php"
+        ]
     }
 }
