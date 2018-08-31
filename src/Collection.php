@@ -81,7 +81,9 @@ class Collection implements \IteratorAggregate
         $total = $this->total;
         $chunk = $this->chunk;
         $from = $chunk == null ? 1 : 1 + ($chunk - 1) * $this->limit;
+        $from = $from > $total ? null : $from;
         $to = $chunk == null ? $total : $chunk * $this->limit;
+        $to = $to > $total ? ($from == null ? null : $total) : $to;
 
         foreach ($this->models as $model) {
             $data[] = $model->toArray($withHidden);
@@ -93,5 +95,10 @@ class Collection implements \IteratorAggregate
     public function toJson($withHidden = false)
     {
         return json_encode($this->toArray($withHidden), JSON_PRETTY_PRINT);
+    }
+
+    public function __toString()
+    {
+        return $this->toJson();
     }
 }

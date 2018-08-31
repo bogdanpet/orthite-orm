@@ -187,10 +187,6 @@ abstract class Model
 
     public function makeCollection($data)
     {
-        if (empty($data)) {
-            return null;
-        }
-
         $collection = new Collection();
 
         foreach ($data as $row) {
@@ -236,5 +232,10 @@ abstract class Model
     public function toJson($withHidden = false)
     {
         return json_encode($this->toArray($withHidden), JSON_PRETTY_PRINT);
+    }
+
+    public function __toString()
+    {
+        return $this->toJson();
     }
 }
