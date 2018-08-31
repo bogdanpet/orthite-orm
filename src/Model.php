@@ -83,30 +83,29 @@ abstract class Model
 
         $data = $model->db->where($model->primaryKey, $key)->select($model->table);
 
-        foreach ($data[0] as $key => $value) {
-            $model->$key = $value;
+        return $model->make($data[0]);
+    }
+
+    public static function findBy($column, $value)
+    {
+        $model = static::newInstance();
+
+        $data = $model->db->where($column, $value)->select($model->table);
+
+        if (count($data) === 1) {
+            return $model->make($data[0]);
         }
 
-        return $model;
+        return $model->makeCollection($data);
     }
 
     public static function all()
     {
         $model = static::newInstance();
 
-        $collection = new Collection();
-
         $data = $model->db->select($model->table);
 
-        foreach ($data as $row) {
-            foreach ($row as $key => $value) {
-                $model->$key = $value;
-            }
-
-            $collection->add($model);
-        }
-
-        return $collection;
+        return $model->makeCollection($data);
     }
 
     public function insert() {
@@ -135,6 +134,33 @@ abstract class Model
                         ->update($this->table, $data);
     }
 
+    public function make($data) {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+
+        return $this;
+    }
+
+    public function makeCollection($data)
+    {
+        if (empty($data)) {
+            return null;
+        }
+
+        $collection = new Collection();
+
+        foreach ($data as $row) {
+            foreach ($row as $key => $value) {
+                $this->$key = $value;
+            }
+
+            $collection->add($this);
+        }
+
+        return $collection;
+    }
+
     public function __get($name)
     {
         if (isset($this->props[$name])) {
@@ -147,5 +173,24 @@ abstract class Model
     public function __set($name, $value)
     {
         $this->props[$name] = $value;
+    }
+
+    public function toArray($withHidden = false)
+    {
+        $props = [];
+        $hidden = [];
+        foreach ($this->props as $key => $value) {
+            if (!in_array($key, $this->hidden)) {
+                $props[$key] = $value;
+            } else {
+                $hidden[$key] = $value;
+            }
+        }
+        return $withHidden ? array_merge($props, $hidden) : $props;
+    }
+
+    public function toJson($withHidden = false)
+    {
+        return json_encode($this->toArray($withHidden), JSON_PRETTY_PRINT);
     }
 }

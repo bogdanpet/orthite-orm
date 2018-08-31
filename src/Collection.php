@@ -11,9 +11,16 @@ class Collection implements \IteratorAggregate
 
     protected $models = [];
 
+    protected $total = 0;
+
+    protected $limit = 10;
+
+    protected $chunk = null;
+
     public function add(Model $model)
     {
         $this->models[] = $model;
+        $this->total++;
     }
 
     public function get($key)
@@ -59,5 +66,25 @@ class Collection implements \IteratorAggregate
         }
 
         return null;
+    }
+
+    public function toArray($withHidden = false)
+    {
+        $data = [];
+        $total = $this->total;
+        $chunk = $this->chunk;
+        $from = $chunk == null ? 1 : 1 + ($chunk - 1) * $this->limit;
+        $to = $chunk == null ? $total : $chunk * $this->limit;
+
+        foreach ($this->models as $model) {
+            $data[] = $model->toArray($withHidden);
+        }
+
+        return compact('data', 'total', 'chunk', 'from', 'to');
+    }
+
+    public function toJson($withHidden = false)
+    {
+        return json_encode($this->toArray($withHidden), JSON_PRETTY_PRINT);
     }
 }
