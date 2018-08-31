@@ -42,6 +42,13 @@ class Collection implements \IteratorAggregate
         return $this;
     }
 
+    public function setChunk($chunk, $limit, $count)
+    {
+        $this->chunk = $chunk;
+        $this->limit = $limit;
+        $this->total = $count;
+    }
+
     /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php

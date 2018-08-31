@@ -108,6 +108,35 @@ abstract class Model
         return $model->makeCollection($data);
     }
 
+    public static function chunk($limit = 10, $chunk = null, $paging = 'page')
+    {
+        $page = !empty($_GET[$paging]) ? $_GET[$paging] : 1;
+        $chunk = $chunk == null ? $page : $chunk;
+
+        $model = static::newInstance();
+
+        $data = $model->db->limit($limit, $chunk)->select($model->table);
+
+        $collection = $model->makeCollection($data);
+
+        $count = static::count();
+
+        $collection->setChunk($chunk, $limit, $count);
+
+        return $collection;
+    }
+
+    public static function count()
+    {
+        $model = static::newInstance();
+
+        $stmt = $model->db->execute('SELECT COUNT(*) as cnt FROM `' . $model->table . '`;');
+
+        $result = $stmt->fetch();
+
+        return (int)$result['cnt'];
+    }
+
     public function insert() {
         $data = [];
 
@@ -134,12 +163,26 @@ abstract class Model
                         ->update($this->table, $data);
     }
 
+    public function save()
+    {
+        if (isset($this->props[$this->primaryKey])) {
+            return $this->update();
+        }
+
+        return $this->insert();
+    }
+
     public function make($data) {
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
 
         return $this;
+    }
+
+    public static function create($data)
+    {
+        return static::newInstance()->make($data)->insert();
     }
 
     public function makeCollection($data)
@@ -151,11 +194,12 @@ abstract class Model
         $collection = new Collection();
 
         foreach ($data as $row) {
+            $model = static::newInstance();
             foreach ($row as $key => $value) {
-                $this->$key = $value;
+                $model->$key = $value;
             }
 
-            $collection->add($this);
+            $collection->add($model);
         }
 
         return $collection;
